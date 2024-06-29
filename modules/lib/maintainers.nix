@@ -524,7 +524,7 @@
     github = "pedorich-n";
     githubId = 15573098;
   };
-  lilleaila = {
+  LilleAila = {
     name = "LilleAila";
     email = "olai@olai.dev";
     github = "LilleAila";
