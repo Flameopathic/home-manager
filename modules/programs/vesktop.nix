@@ -15,8 +15,12 @@ in {
     settings = lib.mkOption {
       type = jsonFormat.type;
       default = { };
-      description =
-        "Vesktop settings to write to $HOME/.config/vesktop/settings.json";
+      description = ''
+        Vesktop settings written to
+        {file}`$XDG_CONFIG_HOME/vesktop/settings.json`. See
+        <https://github.com/Vencord/Vesktop/blob/main/src/shared/settings.d.ts>
+        for available options.
+      '';
       example = lib.literalExpression ''
         {
           appBadge = false;
@@ -37,17 +41,21 @@ in {
     };
 
     vencord = {
-      useSystem = lib.mkEnableOption "vencord package from nixpkgs";
+      useSystem = lib.mkEnableOption "Vencord package from Nixpkgs";
       theme = lib.mkOption {
-        description = "The theme to use for vencord";
+        description = "The theme to use for Vencord";
         default = null;
         type = with lib.types; nullOr (oneOf [ lines path ]);
       };
       settings = lib.mkOption {
         type = jsonFormat.type;
         default = { };
-        description =
-          "Vencord settings to write to $HOME/.config/vesktop/settings/settings.json";
+        description = ''
+          Vencord settings written to
+          {file}`$XDG_CONFIG_HOME/vesktop/settings/settings.json`. See
+          <https://github.com/Vendicated/Vencord/blob/main/src/api/Settings.ts>
+          for available options.
+        '';
         example = lib.literalExpression ''
           {
             autoUpdate = false;
