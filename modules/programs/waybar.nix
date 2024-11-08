@@ -12,7 +12,7 @@ let
 
   mkMargin = name:
     mkOption {
-      type = types.nullOr types.int;
+      type = types.nullOr either types.int types.str;
       default = null;
       example = 10;
       description = "Margin value without unit.";
@@ -113,7 +113,7 @@ let
         };
 
         margin = mkOption {
-          type = nullOr str;
+          type = nullOr (either int str);
           default = null;
           description = "Margins value using the CSS format without units.";
           example = "20 5";
