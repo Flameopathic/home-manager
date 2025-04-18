@@ -37,6 +37,45 @@ in
           See [Using Fcitx 5 on Wayland](https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland).
         '';
       };
+
+      config = lib.mkOption {
+        type = with lib.types; either path lines;
+        default = "";
+        description = ''
+          Configuration to be written to {file}`$XDG_DATA_HOME/fcitx5/conf/classicui.conf`
+        '';
+      };
+
+      themes = lib.mkOption {
+        type =
+          with lib.types;
+          lazyAttrsOf (submodule {
+            options = {
+              theme = lib.mkOption {
+                type = with lib.types; either lines path;
+                description = ''
+                  The `theme.conf` file of the theme.
+
+                  See https://fcitx-im.org/wiki/Fcitx_5_Theme#Background_images
+                  for more information.
+                '';
+              };
+              highlightImage = lib.mkOption {
+                type = lib.types.path;
+                description = "Path to the SVG of the highlight.";
+              };
+              panelImage = lib.mkOption {
+                type = lib.types.path;
+                description = "Path to the SVG of the panel.";
+              };
+            };
+          });
+        example = "";
+        description = ''
+          Themes to be written to {file}`$XDG_DATA_HOME/fcitx5/themes/''${name}`
+        '';
+        default = { };
+      };
     };
   };
 
@@ -57,6 +96,38 @@ in
 
       sessionSearchVariables.QT_PLUGIN_PATH = [ "${fcitx5Package}/${pkgs.qt6.qtbase.qtPluginPrefix}" ];
     };
+
+    xdg =
+      let
+        mkThemeConfig = name: attrs: {
+          dataFile = {
+            "fcitx5/themes/${name}/highlight.svg".source = lib.mkIf (
+              attrs ? highlightImage
+            ) attrs.highlightImage;
+            "fcitx5/themes/${name}/panel.svg".source = lib.mkIf (attrs ? panelImage) attrs.highlightImage;
+            "fcitx5/themes/${name}/theme.conf" = lib.mkIf (attrs ? panelImage) {
+              source =
+                if builtins.isPath attrs.theme || lib.isStorePath attrs.theme then
+                  attrs.theme
+                else
+                  pkgs.writeText "fcitx5-theme.conf" attrs.theme;
+            };
+          };
+        };
+      in
+      lib.mkMerge (
+        [
+          {
+            dataFile."fcitx5/conf/classicui.conf".source = lib.mkIf (cfg.config != "") (
+              if builtins.isPath cfg.config || lib.isStorePath cfg.config then
+                cfg.config
+              else
+                pkgs.writeText "fcitx5-classicui.conf" cfg.config
+            );
+          }
+        ]
+        ++ (builtins.attrValues (lib.mapAttrs mkThemeConfig cfg.themes))
+      );
 
     systemd.user.services.fcitx5-daemon = {
       Unit = {
